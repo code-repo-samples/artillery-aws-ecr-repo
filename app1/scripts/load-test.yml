@@ -13,6 +13,10 @@ config:
     metrics-by-endpoint: 
       useOnlyRequestNames: true
   processor: "../../processors/processor.js"
+  # Tell ECS to include these folders in the bundle
+  includeFiles:
+    - "../../processors/processor.js"
+    - "../../app1/data/clean_ids.csv"
 
   payload:
     path: "../data/clean_ids.csv"

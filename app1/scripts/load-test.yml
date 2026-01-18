@@ -12,14 +12,14 @@ config:
       outputFormat: silent
     metrics-by-endpoint: 
       useOnlyRequestNames: true
-  processor: "processors/processor.js"
+  processor: "../../processors/processor.js"
 
   payload:
-    path: "clean_ids.csv"
+    path: "../data/clean_ids.csv"
 
   variables:
     resetPointer: true
-    sourceFile: "clean_ids.csv"  # The file to read
+    sourceFile: "../data/clean_ids.csv"  # The file to read
     targetVar: "productId"       # The variable name to use in {{ }}
     recycleData: false  # Set to false to abort when IDs run out
 

@@ -1,0 +1,78 @@
+name: 🚀 Run Artillery Load Test
+on:
+  workflow_dispatch:
+    inputs:
+      app_folder:
+        description: 'App Folder (e.g., app1)'
+        required: true
+        default: 'app1'
+      script_name:
+        description: 'Script Name (e.g., firstartillery)'
+        required: true
+        default: 'firstartillery'
+
+jobs:
+  launch-test:
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: us-east-1
+      S3_BUCKET: artillery-github-reports
+      ECS_CLUSTER: ArtilleryCluster
+      TASK_DEFINITION: artillery-task
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: 📦 Bundle and Upload Scripts
+        run: |
+          # Bundle the shared processors and the specific app folder
+          tar -czf bundle.tar.gz processors/ ${{ github.event.inputs.app_folder }}/
+          aws s3 cp bundle.tar.gz s3://${{ env.S3_BUCKET }}/bundles/${{ github.run_id }}.tar.gz
+
+      - name: 🚀 Trigger ECS Fargate Task
+        id: run-task
+        run: |
+          TASK_ARN=$(aws ecs run-task \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --task-definition ${{ env.TASK_DEFINITION }} \
+            --launch-type FARGATE \
+            --network-configuration "awsvpcConfiguration={subnets=[${{ secrets.SUBNET_ID }}],assignPublicIp=ENABLED}" \
+            --overrides '{
+              "containerOverrides": [{
+                "name": "artillery-container",
+                "environment": [
+                  {"name": "S3_BUCKET", "value": "${{ env.S3_BUCKET }}"},
+                  {"name": "BUNDLE_ID", "value": "${{ github.run_id }}"},
+                  {"name": "APP_PATH", "value": "${{ github.event.inputs.app_folder }}"},
+                  {"name": "SCRIPT_NAME", "value": "${{ github.event.inputs.script_name }}"},
+                  {"name": "ANY_SECRET_API_KEY", "value": "${{ secrets.MY_API_KEY }}"}
+                ]
+              }]
+            }' --query "tasks[0].taskArn" --output text)
+          
+          echo "task_arn=$TASK_ARN" >> $GITHUB_OUTPUT
+          echo "Task Started: $TASK_ARN"
+
+      - name: ⏳ Wait for Test Completion
+        run: |
+          aws ecs wait tasks-stopped \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --tasks ${{ steps.run-task.outputs.task_arn }}
+
+      - name: 📥 Download Report
+        run: |
+          aws s3 cp s3://${{ env.S3_BUCKET }}/reports/${{ github.run_id }}.json ./final-report.json
+
+      - name: 📊 Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: artillery-report-${{ github.run_id }}
+          path: ./final-report.json

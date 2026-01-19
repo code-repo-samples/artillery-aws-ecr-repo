@@ -1,8 +1,8 @@
 config:
   target: "https://8u0xag1lqh.execute-api.us-east-1.amazonaws.com/prod/"
   phases:
-    - duration: 300
-      arrivalRate: 200
+    - duration: 600
+      arrivalRate: 300
   defaults:
     headers:
       Content-Type: "application/json"

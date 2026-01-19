@@ -18,8 +18,8 @@ config:
   #   - "../../processors/processor.js"
   #   - "../../app1/data/clean_ids.csv"
 
-  payload:
-    path: "../data/clean_ids.csv"
+  # payload:
+  #   path: "../data/clean_ids.csv"
 
   variables:
     resetPointer: true

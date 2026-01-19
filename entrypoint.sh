@@ -1,7 +1,9 @@
 #!/bin/bash
 set -e
 
-# Ensure we are in the root
+# ------------------------------
+# 1. Set working directory
+# ------------------------------
 cd /artillery
 
 echo "--- DEBUG: ENVIRONMENT ---"
@@ -10,26 +12,68 @@ echo "APP_PATH: $APP_PATH"
 echo "SCRIPT_NAME: $SCRIPT_NAME"
 echo "BUNDLE_ID: $BUNDLE_ID"
 
-# 1. Download and Extract
+# ------------------------------
+# 2. Download and extract bundle
+# ------------------------------
 echo "--- DEBUG: FETCHING BUNDLE ---"
 aws s3 cp s3://${S3_BUCKET}/bundles/${BUNDLE_ID}.tar.gz test_bundle.tar.gz
 tar -xzf test_bundle.tar.gz
 
-# 2. File Listing for Verification
-echo "--- DEBUG: FILE STRUCTURE ---"
-ls -R
+# ------------------------------
+# 3. Pre-test folder listing
+# ------------------------------
+echo "--- DEBUG: FILE STRUCTURE BEFORE TEST ---"
+find . -type f \( \
+  -iname "*.json" -o \
+  -iname "*.jsonl" -o \
+  -iname "*.log" -o \
+  -iname "*.csv" -o \
+  -iname "*.html" -o \
+  -iname "*.yml" \
+\) -exec ls -lh {} \; | sort
 
-# 3. Create a local reports directory for this specific run
+# ------------------------------
+# 4. Create reports directory & export ENV
+# ------------------------------
 mkdir -p "reports/${BUNDLE_ID}"
+export ARTILLERY_REPORT_DIR="reports/${BUNDLE_ID}"
+echo "--- DEBUG: ARTILLERY_REPORT_DIR ---"
+echo "$ARTILLERY_REPORT_DIR"
 
-# 4. Execute Artillery
-# Output is saved into the folder named after the BUNDLE_ID
+# ------------------------------
+# 5. Run Artillery
+# ------------------------------
 echo "--- EXECUTION: STARTING TEST ---"
 artillery run \
   --output "reports/${BUNDLE_ID}/report.json" \
   "${APP_PATH}/scripts/${SCRIPT_NAME}.yml"
 
-# 5. Upload everything in the reports folder to S3
-# This uploads the entire folder: s3://bucket/reports/RUN_ID/report.json
+# ------------------------------
+# 6. Generate HTML report (if JSON exists)
+# ------------------------------
+if [ -f "reports/${BUNDLE_ID}/report.json" ]; then
+  artillery report "reports/${BUNDLE_ID}/report.json" \
+    --output "reports/${BUNDLE_ID}/report.html"
+else
+  echo "⚠️ report.json not found, skipping HTML generation"
+fi
+
+# ------------------------------
+# 7. Post-test folder listing
+# ------------------------------
+echo "--- DEBUG: FILE STRUCTURE AFTER TEST ---"
+find . -type f \( \
+  -iname "*.json" -o \
+  -iname "*.jsonl" -o \
+  -iname "*.log" -o \
+  -iname "*.csv" -o \
+  -iname "*.html" -o \
+  -iname "*.yml" \
+\) -exec ls -lh {} \; | sort
+
+# ------------------------------
+# 8. Upload artifacts to S3
+# ------------------------------
 echo "--- FINISHING: UPLOADING ARTIFACTS ---"
-aws s3 cp "reports/${BUNDLE_ID}/" "s3://${S3_BUCKET}/reports/${BUNDLE_ID}/" --recursive
+aws s3 cp "reports/${BUNDLE_ID}/" \
+  "s3://${S3_BUCKET}/reports/${BUNDLE_ID}/" --recursive

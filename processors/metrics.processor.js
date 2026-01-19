@@ -25,7 +25,10 @@ const PROJECT_ROOT = path.resolve(__dirname, '..');
 /**
  * Results directory (created if missing).
  */
-const RESULTS_DIR = path.join(PROJECT_ROOT, '_results');
+// const RESULTS_DIR = path.join(PROJECT_ROOT, '_results');
+const RESULTS_DIR = process.env.ARTILLERY_REPORT_DIR
+  ? path.resolve(process.cwd(), process.env.ARTILLERY_REPORT_DIR)
+  : path.join(PROJECT_ROOT, '_results');
 
 /**
  * Metrics file path.
@@ -131,3 +134,4 @@ module.exports = {
   scenarioEnd,
   captureMetrics
 };
+

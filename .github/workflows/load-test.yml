@@ -69,7 +69,8 @@ jobs:
 
       - name: 📥 Download Report
         run: |
-          aws s3 cp s3://${{ env.S3_BUCKET }}/reports/${{ github.run_id }}.json ./final-report.json
+          # aws s3 cp s3://${{ env.S3_BUCKET }}/reports/${{ github.run_id }}.json ./final-report.json
+          aws s3 cp s3://${{ env.S3_BUCKET }}/reports/${{ github.run_id }}/report.json ./final-report.json
 
       - name: 📊 Upload Artifact
         uses: actions/upload-artifact@v4

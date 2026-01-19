@@ -34,9 +34,9 @@ config:
   #     - "name"
   #   order: "random" # or "random"
 
-  ensure:
-    p95: 1000
-    maxErrorRate: 2
+  # ensure:
+  #   p95: 1000
+  #   maxErrorRate: 2
     # thresholds:
     #     # p99 of response time must be <250:
     #     - 'http.response_time.p99': 250

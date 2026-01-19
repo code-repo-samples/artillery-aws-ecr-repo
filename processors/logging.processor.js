@@ -31,7 +31,7 @@ function logResponse(requestParams, response, userContext, ee, next) {
     globalErrorCount++;
     if (!shuttingDown && globalErrorCount >= ERROR_THRESHOLD) {
       shuttingDown = true;
-      setTimeout(() => process.kill(process.pid, 'SIGTERM'), 50);
+      // setTimeout(() => process.kill(process.pid, 'SIGTERM'), 50);
     }
   }
   next();
@@ -41,3 +41,4 @@ module.exports = {
   logProductId,
   logResponse
 };
+

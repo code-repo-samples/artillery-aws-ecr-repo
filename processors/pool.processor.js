@@ -131,7 +131,7 @@ function pullFromPool(userContext, events, done) {
       userContext.vars.skipMe = true;
 
       // Gracefully stop the test shortly
-      setTimeout(() => process.kill(process.pid, 'SIGTERM'), 50);
+      // setTimeout(() => process.kill(process.pid, 'SIGTERM'), 50);
       return done();
     }
 
@@ -165,3 +165,4 @@ function pullFromPool(userContext, events, done) {
 }
 
 module.exports = { pullFromPool };
+

@@ -59,16 +59,16 @@ const metricsStream = fs.createWriteStream(METRICS_FILE, {
  * ------------------------------------------------------------
  * Ensures metrics are flushed before process exit.
  */
-function shutdown() {
-  try {
-    metricsStream.end();
-  } finally {
-    process.exit();
-  }
-}
+// function shutdown() {
+//   try {
+//     metricsStream.end();
+//   } finally {
+//     process.exit();
+//   }
+// }
 
-process.on('SIGINT', shutdown);
-process.on('SIGTERM', shutdown);
+// process.on('SIGINT', shutdown);
+// process.on('SIGTERM', shutdown);
 
 /**
  * ------------------------------------------------------------
@@ -134,4 +134,5 @@ module.exports = {
   scenarioEnd,
   captureMetrics
 };
+
 

@@ -9,7 +9,7 @@ on:
       script_name:
         description: 'Script Name (e.g., firstartillery)'
         required: true
-        default: 'firstartillery'
+        default: 'load-test'
 
 jobs:
   launch-test:

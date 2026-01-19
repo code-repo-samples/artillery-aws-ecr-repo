@@ -1,12 +1,20 @@
 const fs = require('fs');
 const path = require('path');
 
-const errorLogFile = path.join('reports', 'error_log.json');
+// --- Standardized Path Resolution ---
+// If ARTILLERY_REPORT_DIR is set in entrypoint.sh, use it. 
+// Otherwise, fallback to a local 'reports' folder.
 
-// Ensure reports folder exists
-if (!fs.existsSync('reports')) {
-    fs.mkdirSync('reports');
+const RESULTS_DIR = process.env.ARTILLERY_REPORT_DIR
+  ? path.resolve(process.cwd(), process.env.ARTILLERY_REPORT_DIR)
+  : path.join(process.cwd(), 'reports');
+
+// Ensure the directory exists so appendFileSync doesn't crash
+if (!fs.existsSync(RESULTS_DIR)) {
+    fs.mkdirSync(RESULTS_DIR, { recursive: true });
 }
+
+const errorLogFile = path.join(RESULTS_DIR, 'error.log');
 
 
 /**
@@ -32,11 +40,7 @@ function logError(request, response, context, ee, next) {
         ].join(' | ') + '\n';
 
         // Append-only write (safe under load & parallel workers)
-        fs.appendFileSync(
-            path.join('reports', 'error.log'),
-            logLine,
-            'utf8'
-        );
+        fs.appendFileSync(errorLogFile, logLine, 'utf8');
     }
 
     return next();
@@ -72,3 +76,4 @@ module.exports = {
     randomPost,
     logError
 };
+

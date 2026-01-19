@@ -1,10 +1,9 @@
 #!/bin/bash
-set -e
 
 # ------------------------------
 # 1. Set working directory
 # ------------------------------
-cd /artillery
+cd /artillery || exit 1
 
 echo "--- DEBUG: ENVIRONMENT ---"
 echo "Current Dir: $(pwd)"
@@ -16,7 +15,7 @@ echo "BUNDLE_ID: $BUNDLE_ID"
 # 2. Download and extract bundle
 # ------------------------------
 echo "--- DEBUG: FETCHING BUNDLE ---"
-aws s3 cp s3://${S3_BUCKET}/bundles/${BUNDLE_ID}.tar.gz test_bundle.tar.gz
+aws s3 cp "s3://${S3_BUCKET}/bundles/${BUNDLE_ID}.tar.gz" test_bundle.tar.gz
 tar -xzf test_bundle.tar.gz
 
 # ------------------------------
@@ -41,12 +40,12 @@ echo "--- DEBUG: ARTILLERY_REPORT_DIR ---"
 echo "$ARTILLERY_REPORT_DIR"
 
 # ------------------------------
-# 5. Run Artillery
+# 5. Run Artillery (ignore exit code to continue script)
 # ------------------------------
 echo "--- EXECUTION: STARTING TEST ---"
 artillery run \
   --output "reports/${BUNDLE_ID}/report.json" \
-  "${APP_PATH}/scripts/${SCRIPT_NAME}.yml"
+  "${APP_PATH}/scripts/${SCRIPT_NAME}.yml" || true
 
 # ------------------------------
 # 6. Generate HTML report (if JSON exists)
@@ -59,7 +58,7 @@ else
 fi
 
 # ------------------------------
-# 7. Post-test folder listing
+# 7. Post-test folder listing (filtered for relevant files)
 # ------------------------------
 echo "--- DEBUG: FILE STRUCTURE AFTER TEST ---"
 find . -type f \( \
@@ -74,6 +73,9 @@ find . -type f \( \
 # ------------------------------
 # 8. Upload artifacts to S3
 # ------------------------------
+echo "--- DEBUG: FILES TO UPLOAD ---"
+ls -lh "reports/${BUNDLE_ID}/"
+
 echo "--- FINISHING: UPLOADING ARTIFACTS ---"
 aws s3 cp "reports/${BUNDLE_ID}/" \
   "s3://${S3_BUCKET}/reports/${BUNDLE_ID}/" --recursive

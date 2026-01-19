@@ -67,13 +67,24 @@ jobs:
             --cluster ${{ env.ECS_CLUSTER }} \
             --tasks ${{ steps.run-task.outputs.task_arn }}
 
-      - name: 📥 Download Report
+      - name: 📥 Download Reports Folder
         run: |
-          # aws s3 cp s3://${{ env.S3_BUCKET }}/reports/${{ github.run_id }}.json ./final-report.json
-          aws s3 cp s3://${{ env.S3_BUCKET }}/reports/${{ github.run_id }}/report.json ./final-report.json
+          aws s3 cp "s3://${{ env.S3_BUCKET }}/reports/${{ github.run_id }}/" \
+            "./reports/${{ github.run_id }}/" --recursive
 
-      - name: 📊 Upload Artifact
+      - name: 📊 Upload Artillery Reports
         uses: actions/upload-artifact@v4
         with:
           name: artillery-report-${{ github.run_id }}
-          path: ./final-report.json
+          path: ./reports/${{ github.run_id }}/
+
+      # - name: 📥 Download Report
+      #   run: |
+      #     # aws s3 cp s3://${{ env.S3_BUCKET }}/reports/${{ github.run_id }}.json ./final-report.json
+      #     aws s3 cp s3://${{ env.S3_BUCKET }}/reports/${{ github.run_id }}/report.json ./final-report.json
+
+      # - name: 📊 Upload Artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: artillery-report-${{ github.run_id }}
+      #     path: ./final-report.json

@@ -44,6 +44,7 @@ jobs:
             --cluster ${{ env.ECS_CLUSTER }} \
             --task-definition ${{ env.TASK_DEFINITION }} \
             --launch-type FARGATE \
+            --count 3 \
             --network-configuration "awsvpcConfiguration={subnets=[${{ secrets.SUBNET_ID }}],assignPublicIp=ENABLED}" \
             --overrides '{
               "containerOverrides": [{
@@ -54,7 +55,9 @@ jobs:
                   {"name": "APP_PATH", "value": "${{ github.event.inputs.app_folder }}"},
                   {"name": "SCRIPT_NAME", "value": "${{ github.event.inputs.script_name }}"},
                   {"name": "ANY_SECRET_API_KEY", "value": "${{ secrets.MY_API_KEY }}"}
-                ]
+                ],
+                "cpu": 4096,
+                "memory": 8192
               }]
             }' --query "tasks[0].taskArn" --output text)
           

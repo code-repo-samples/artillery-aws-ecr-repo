@@ -14,18 +14,18 @@ config:
       useOnlyRequestNames: true
   processor: "../../processors/processor.js"
   # Tell ECS to include these folders in the bundle
-  includeFiles:
-    - "../../processors/processor.js"
-    - "../../app1/data/clean_ids.csv"
+  # includeFiles:
+  #   - "../../processors/processor.js"
+  #   - "../../app1/data/clean_ids.csv"
 
-  payload:
-    path: "app1/data/clean_ids.csv"
+  # payload:
+  #   path: "app1/data/clean_ids.csv"
 
-  variables:
-    resetPointer: true
-    sourceFile: "app1/data/clean_ids.csv"  # The file to read
-    targetVar: "productId"       # The variable name to use in {{ }}
-    recycleData: false  # Set to false to abort when IDs run out
+  # variables:
+  #   resetPointer: true
+  #   sourceFile: "app1/data/clean_ids.csv"  # The file to read
+  #   targetVar: "productId"       # The variable name to use in {{ }}
+  #   recycleData: false  # Set to false to abort when IDs run out
 
   # --- ADDED PAYLOAD MODULE ---
   # payload:
@@ -52,9 +52,9 @@ scenarios:
   - flow:
       # - log: "ProductName: {{name}}"
 
-      - function: "pullFromPool"
+      # - function: "pullFromPool"
       # This matches 'targetVar' above
-      - log: "Requesting: /products/{{ productId }}"
+      # - log: "Requesting: /products/{{ productId }}"
       
       # GET request with random query params
       - function: "randomGet"

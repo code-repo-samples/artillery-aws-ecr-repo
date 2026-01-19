@@ -2,7 +2,7 @@
 FROM node:20-slim
 
 # Install Artillery & AWS CLI
-RUN npm install -g artillery@latest --unsafe-perm && \
+RUN npm install -g artillery@2.0.21 --unsafe-perm && \
     apt-get update && apt-get install -y curl unzip && \
     curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
     unzip awscliv2.zip && ./aws/install && \
